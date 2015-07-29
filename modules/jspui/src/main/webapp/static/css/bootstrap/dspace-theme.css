@@ -106,3 +106,11 @@ span.batchimport-error-tab {
 span.batchimport-error-caused {
 	font-weight:bold;
 }
+.statsTable td {
+    border: #222 solid 1px;
+    font-size: 0.8em;
+}
+
+.statsTable td, th {
+    padding: 4px;
+}
