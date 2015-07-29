@@ -78,11 +78,11 @@
     // retain scope when navigating result sets
     String searchScope = "";
     if (community == null && collection == null) {
-	searchScope = "";
+  searchScope = "";
     } else if (collection == null) {
-	searchScope = "/handle/" + community.getHandle();
+  searchScope = "/handle/" + community.getHandle();
     } else {
-	searchScope = "/handle/" + collection.getHandle();
+  searchScope = "/handle/" + collection.getHandle();
     }
 
     // Admin user or not
@@ -99,6 +99,104 @@
     <%-- <h1>Search Results</h1> --%>
 
 <h1><fmt:message key="jsp.search.results.title"/></h1>
+
+<%
+    if(0 < communities.length || 0 < collections.length || 0 < items.length){
+%>
+<div id="search-results-division">
+<% if (communities.length > 0 ) { %>
+    <%-- <h3>Community Hits:</h3> --%>
+    <h3><fmt:message key="jsp.search.results.comhits"/></h3>
+    <dspace:communitylist  communities="<%= communities %>" />
+<% } %>
+
+<% if (collections.length > 0 ) { %>
+    <br/>
+    <%-- <h3>Collection hits:</h3> --%>
+    <h3><fmt:message key="jsp.search.results.colhits"/></h3>
+    <dspace:collectionlist collections="<%= collections %>" />
+<% } %>
+
+<% if (items.length > 0) { %>
+    <br/>
+    <%-- <h3>Item hits:</h3> --%>
+    <h3><fmt:message key="jsp.search.results.itemhits"/></h3>
+    <dspace:itemlist items="<%= items %>" sortOption="<%= so %>" authorLimit="<%= qResults.getEtAl() %>" />
+<% } %>
+</div>
+<%
+    }
+%>
+
+<p align="center">
+
+<%
+    // create the URLs accessing the previous and next search result pages
+    String prevURL =  request.getContextPath()
+                    + searchScope
+                    + "/simple-search?query="
+                    + URLEncoder.encode(query,"UTF-8")
+                    + "&amp;sort_by=" + (so != null ? so.getNumber() : 0)
+                    + "&amp;order=" + order
+                    + "&amp;rpp=" + rpp
+                    + "&amp;etal=" + etAl
+                    + "&amp;start=";
+
+    String nextURL = prevURL;
+
+    prevURL = prevURL
+            + (pageCurrent-2) * qResults.getPageSize();
+
+    nextURL = nextURL
+            + (pageCurrent) * qResults.getPageSize();
+
+
+if (pageFirst != pageCurrent)
+{
+    %><a href="<%= prevURL %>"><fmt:message key="jsp.search.general.previous" /></a><%
+};
+
+
+for( int q = pageFirst; q <= pageLast; q++ )
+{
+    String myLink = "<a href=\""
+                    + request.getContextPath()
+                    + searchScope
+                    + "/simple-search?query="
+                    + URLEncoder.encode(query,"UTF-8")
+                    + "&amp;sort_by=" + (so != null ? so.getNumber() : 0)
+                    + "&amp;order=" + order
+                    + "&amp;rpp=" + rpp
+                    + "&amp;etal=" + etAl
+                    + "&amp;start=";
+
+
+    if( q == pageCurrent )
+    {
+        myLink = "" + q;
+    }
+    else
+    {
+        myLink = myLink
+            + (q-1) * qResults.getPageSize()
+            + "\">"
+            + q
+            + "</a>";
+    }
+%>
+
+<%= myLink %>
+
+<%
+}
+
+if (pageTotal > pageCurrent)
+{
+    %><a href="<%= nextURL %>"><fmt:message key="jsp.search.general.next" /></a><%
+}
+%>
+
+</p>
 
     <%-- Controls for a repeat search --%>
     <form action="simple-search" method="get">
@@ -185,7 +283,7 @@ else
 {
 %>
     <%-- <p align="center">Results <//%=qResults.getStart()+1%>-<//%=qResults.getStart()+qResults.getHitHandles().size()%> of --%>
-	<p align="center"><fmt:message key="jsp.search.results.results">
+  <p align="center"><fmt:message key="jsp.search.results.results">
         <fmt:param><%=qResults.getStart()+1%></fmt:param>
         <fmt:param><%=qResults.getStart()+qResults.getHitHandles().size()%></fmt:param>
         <fmt:param><%=qResults.getHitCount()%></fmt:param>
@@ -296,104 +394,6 @@ else
    </table>
    </form>
    </div>
-
-<%
-    if(0 < communities.length || 0 < collections.length || 0 < items.length){
-%>
-<div id="search-results-division">
-<% if (communities.length > 0 ) { %>
-    <%-- <h3>Community Hits:</h3> --%>
-    <h3><fmt:message key="jsp.search.results.comhits"/></h3>
-    <dspace:communitylist  communities="<%= communities %>" />
-<% } %>
-
-<% if (collections.length > 0 ) { %>
-    <br/>
-    <%-- <h3>Collection hits:</h3> --%>
-    <h3><fmt:message key="jsp.search.results.colhits"/></h3>
-    <dspace:collectionlist collections="<%= collections %>" />
-<% } %>
-
-<% if (items.length > 0) { %>
-    <br/>
-    <%-- <h3>Item hits:</h3> --%>
-    <h3><fmt:message key="jsp.search.results.itemhits"/></h3>
-    <dspace:itemlist items="<%= items %>" sortOption="<%= so %>" authorLimit="<%= qResults.getEtAl() %>" />
-<% } %>
-</div>
-<%
-    }
-%>
-
-<p align="center">
-
-<%
-    // create the URLs accessing the previous and next search result pages
-    String prevURL =  request.getContextPath()
-                    + searchScope
-                    + "/simple-search?query="
-                    + URLEncoder.encode(query,"UTF-8")
-                    + "&amp;sort_by=" + (so != null ? so.getNumber() : 0)
-                    + "&amp;order=" + order
-                    + "&amp;rpp=" + rpp
-                    + "&amp;etal=" + etAl
-                    + "&amp;start=";
-
-    String nextURL = prevURL;
-
-    prevURL = prevURL
-            + (pageCurrent-2) * qResults.getPageSize();
-
-    nextURL = nextURL
-            + (pageCurrent) * qResults.getPageSize();
-
-
-if (pageFirst != pageCurrent)
-{
-    %><a href="<%= prevURL %>"><fmt:message key="jsp.search.general.previous" /></a><%
-};
-
-
-for( int q = pageFirst; q <= pageLast; q++ )
-{
-    String myLink = "<a href=\""
-                    + request.getContextPath()
-                    + searchScope
-                    + "/simple-search?query="
-                    + URLEncoder.encode(query,"UTF-8")
-                    + "&amp;sort_by=" + (so != null ? so.getNumber() : 0)
-                    + "&amp;order=" + order
-                    + "&amp;rpp=" + rpp
-                    + "&amp;etal=" + etAl
-                    + "&amp;start=";
-
-
-    if( q == pageCurrent )
-    {
-        myLink = "" + q;
-    }
-    else
-    {
-        myLink = myLink
-            + (q-1) * qResults.getPageSize()
-            + "\">"
-            + q
-            + "</a>";
-    }
-%>
-
-<%= myLink %>
-
-<%
-}
-
-if (pageTotal > pageCurrent)
-{
-    %><a href="<%= nextURL %>"><fmt:message key="jsp.search.general.next" /></a><%
-}
-%>
-
-</p>
 
 <form id="dso-display" action="<%=request.getContextPath()%>/dso-display" method="post">
     <input type="hidden" name="query"   value="<%=StringEscapeUtils.escapeHtml(query)%>"/>
