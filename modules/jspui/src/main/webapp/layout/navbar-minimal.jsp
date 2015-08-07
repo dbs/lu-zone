@@ -59,6 +59,9 @@
          <a class="navbar-brand" href="http://biblio.laurentian.ca"><img height="25" src="<%= request.getContextPath() %>/image/lu-logo-only.png" alt="LU logo" /></a>
        </div>
        <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+        <ul class="nav navbar-nav">
+           <li class="<%= currentPage.endsWith("/home.jsp")? "active" : "" %>"><a href="<%= request.getContextPath() %>/"><span class="glyphicon glyphicon-home"></span> <fmt:message key="jsp.layout.navbar-default.home"/></a></li>
+        </ul>
        <div class="nav navbar-nav navbar-right">
     <ul class="nav navbar-nav navbar-right">
          <li class="dropdown">
