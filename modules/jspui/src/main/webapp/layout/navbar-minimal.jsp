@@ -60,6 +60,25 @@
        </div>
        <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
         <ul class="nav navbar-nav">
+           <style>
+            li:hover .LU-blue {
+              color: #05A;
+              font-size: 20pt;
+            }
+            li .LU-blue {
+              color: #048;
+              font-size: 20pt;
+            }
+            li:hover .LU-yellow {
+              color: #FC2;
+              font-size: 20pt;
+            }
+            li .LU-yellow {
+              color: #B91;
+              font-size: 20pt;
+            }
+           </style>
+           <li><a href="<%= request.getContextPath() %>"><b class="LU-blue">LU</b> <b class="LU-yellow">ZONE</b> <b class="LU-blue">UL</b></a></li>
            <li class="<%= currentPage.endsWith("/home.jsp")? "active" : "" %>"><a href="<%= request.getContextPath() %>/"><span class="glyphicon glyphicon-home"></span> <fmt:message key="jsp.layout.navbar-default.home"/></a></li>
         </ul>
        <div class="nav navbar-nav navbar-right">
