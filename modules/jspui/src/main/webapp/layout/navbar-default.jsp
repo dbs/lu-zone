@@ -132,6 +132,7 @@
             </ul>
           </li>
           <li class="<%= ( currentPage.endsWith( "/help" ) ? "active" : "" ) %>"><dspace:popup page="<%= LocaleSupport.getLocalizedMessage(pageContext, \"help.index\") %>"><fmt:message key="jsp.layout.navbar-default.help"/></dspace:popup></li>
+          <li><dspace:popup page="<%= LocaleSupport.getLocalizedMessage(pageContext, \"irfaq\") %>">FAQ</dspace:popup></li>
        </ul>
 
  <% if (supportedLocales != null && supportedLocales.length > 1)
