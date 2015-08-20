@@ -1,0 +1,136 @@
+LU DSpace Deployment/Upgrade Documentation
+
+Victoria Lacroix
+
+This is a rough outline of Laurentian University's customizations. Presumably, you're reading this as a way to help along with upgrading our no-doubt outdated version of DSpace to something that looks and feels much better. The intention of this guide is to walk through customizations that were made to DSpace 5.x, and *should* serve as a base for whatever version you're working with.
+
+I. Structure
+
+The instructions needed to actually install DSpace with Laurentian customizations are in dspace-lu-install.sh (consult it!). The application is built with Maven, and has one notable quirk that makes customizing pretty painless: Each module of DSpace exists as 2 separate projects - one that's not variable and another that is. The variable project is where you'll be dropping the config/ and modules/ directories in. To distinguish between the two, the source directory of DSpace should have several dspace-* subdirectories (such as dspace-jspui, dspace-api etc). These are the vanilla files, and you're generally not gonna want to touch them. The dspace/ subdirectory on the other hand contains our 'Local Customizations' of dspace modules and files - files that don't get put into there get taken from the default modules instead.
+
+Once built, DSpace will maintain a structure roughly similar to the dspace/ subdirectory where the customizations live. There are a few folder tweaks to allow some binaries to work as intended, on top of the modules/ folder being renamed to webapps/. This folder contains the java code that the server will run to display pages to the user. Our current setup focuses mostly on the JSP-UI (which we rename to dspace/ to facilitate linking). This folder then gets recursively copied to Tomcat's webapps directory, where they are then deployed and put into action. Again, dspace-lu-install.sh is your friend. It's here to help you.
+
+Generally, you'll want to build a totally vanilla DSpace before layering our local customizations on. Familiarizing yourself with the base application and the building/deploying process is KEY to being able to understand how DSpace is built. After you've built and familiarized yourself with the application (especially the Administration), you'll want to consult the Git logs to understand changes made to the JSPs and other files for the upgrade - you'll need those. Generally, nothing really new will need to be done unless the JSP-UI was greatly overhauled.
+
+II. JSP-UI
+
+For Laurentian, we use the JSP-UI as our front-end as opposed to the Manakin XML-UI. This is done for a few reasons, mostly entailing ease-of-localization and general knowledge of the application (not to mention that a work-study student will be much more familiar with Java than XML). JSP-UI is a front-end that essentially acts as a database accessor, allowing users to search the repository for theses and other academic materials (some library presentations are also kept there for convenience). It's based on the Java Server Pages (JSP) language, a mash-up of Java and HTML for the purposes of deploying a webapp. If you've used PHP or other HTML templating languages, you'll feel right at home here. 
+
+Before hopping into customizing, you'll again want to familiarize yourself with the application, especially the administrative bits.
+
+First up are layouts that appear in every page. In layout/ there are 3 navbars, 3 headers and 3 footers. The navbars function as the menu bar at the top of the application (in 5.x), and there are 3 varieties: navbar-default.jsp contains the navbar that most users will see, with features to navigate the repository and change language. The file navbar-minimal.jsp displays during a submission and features basically nothing but a logo. Finally, navbar-admin.jsp shows when a user is logged in and administrating. It contains the largest amount of features, allowing control of many different resources.
+
+Next up are the header-* files. They do nothing. In vanilla versions of DSpace, it effectively acts as advertisement for the DSpace software. There are also 3 versions that exist, with the same conditions bringing them forward.
+
+And lastly there are footer-* files. It's exactly as what you'd expect, though the current DSpace features heavily toned down footers, favouring just a small "feedback" link. By default, it shows the theme of the site and some copyrights for DSpace.
+
+All of the .JSPs contain several <fmt:message> tags. This is how DSpace handles messages. In the file modules/jspui/src/main/resources/Messages.properties, all of DSpace's messages are kept with concise labels showing their location of use. Additionally, there's a Messages_fr.properties file with a full (as of 5.2) french translation (and replacement of the word "DSpace" with "LU|ZONE|UL". Unfortunately, you'll probably need to translate the application's new lines. Contribute them back upstream if you do! This file also contains translatable filenames - names of files that have different states depending on language. As a good example, take a look at config/news-top_LANG.html. The contents of the file are too much to just put into Messages.properties, so is in it's own file and plugged into webapp/index.jsp. It also allows for more localized news, if the time can be put into such. The list of files whose names are translatable is available on the DSpace Wiki's Configuration Reference, under Internationalization for the JSP-UI. For some reason though, config/default.license must be deleted before the other licenses will be properly used by DSpace. (This was a glitch in 5.2 and may be fixed in a later version).
+
+As always, consult the Git logs and the files themselves to get more info!
+
+III. The other bits
+
+DSpace has lots of other pieces that intercommunicate. We'll take a quick glimpse at the ones that are of interest.
+
+The first is SOLR. It's the indexing engine for items in DSpace, and effectively enables the searching to take place. No customization is needed, but you should make extra sure that /dspace is owned by Tomcat, otherwise it will essentially be useless. Additionally, make sure to start indexing using /dspace/bin/dspace index-lucene-init. 
+
+Next up is OAI. It provides a groundwork for harvesting metadata for the theses and other items in DSpace. Library Archives Canada / Biblio Archives Canada uses this application to harvest metadata in the ETD-MS (Electronic Theses and Dissertation Metadata Schema). The webapp is based on Lyncode's XOAI as of writing this, so if any issues come along, that's an excellent first resouce. It inherits all of it's good stuff from config/dspace.cfg, so that should be your first stop for it. Otherwise, config/modules/oai.cfg is your next step.
+
+While DSpace's Asset Store (/dspace/assetstore) isn't necessarily it's own thing, it should also be explained too. It contains the files used by the repository itself, whereas the database contains information about the files. This is done because database systems are really good for small data, not .doc or .ppt files. This needs to be put into place for the repository to do *anything*.
+
+DSpace's API is only really useful as a secondary place to hold translated messages - otherwise you can pay no attention to it.
+
+IV. Configuration
+
+DSpace configuration is done mainly through config/dspace.cfg. While everything is self-explanatory, it'd be good to clarify what the important pieces are.
+
+	dspace.dir is the root directory for DSpace. Don't change this!
+	dspace.hostname is the name of DSpace's host.
+	dspace.baseUrl is the base URL for DSpace. While generally supposed to be identical to hostname, it's not always the case.
+	dspace.url is the URL for the default DSpace (JSP-UI or XML-UI) application. It's where the repository's homepage is.
+	
+	DSpace's database details follow right after, and the settings will have to depend on what's being done at the time. It's all straightforward once you know the database setup being used.
+
+	default.locale is the locale that is used by default. Unless massive changes have happened to LU, this'll be English (en).	
+	webui.supported.locales contains the locales that the JSP-UI will use by default. Setting multiple locales activates the language switching option in the navbar.
+
+For OAI, configuration is in config/modules/oai.cfg, but should inherit some values from config/dspace.cfg. This is a great first place to look should the XOAI application break some links for requesting.
+
+V. Files
+
+This is a list of files in the lu-zone.git repository, and their rough functions in DSpace. This is more meant as a guide for what has been customized.
+
+lu-zone/
+	config/
+		dspace.cfg
+			"Settings for DSpace, such as basic information, database stuff, locales, mail. Everything core to DSpace as a whole is configured here."
+		default_en.license
+		default_fr.license
+			"LU license for distribution and archival"
+		news-top_en.html
+		news-top_fr.html
+			"Introduction text for the LU ZONE UL institutional repository, with links."
+		news-side_en.html
+		news-side_fr.html
+			"Side news intentionally left blank."
+		modules/
+			oai.cfg
+				"Default config for the OAI module. Inherits some settings from dspace.cfg"
+		crosswalks/oai/metadataFormats/
+			etdms.xsl
+				"ETD-MS metadata crosswalk, customized for compatiblity with LAC-BAC. It determines the format of ETD-MS harvests."
+	dspace-api/src/main/resources/
+		Messages.properties
+			"Contains strings used by the JSP-UI application"
+		Messages_fr.properties
+			"Contains french-translated strings used by JSP-UI"
+	dspace-lu-install.sh
+		"An installation script for DSpace"
+	modules/jspui/src/main/
+		resources/
+			Messages.properties
+				"Contains strings used by the JSP-UI application"
+			Messages_fr.properties
+				"Contains french-translated strings used by JSP-UI"
+		webapp/
+			home.jsp
+				"Contains header and navbar for JSP-UI"
+			index.jsp
+				"Home page of the application. Serves up home.jsp and extra pieces to aid navigation."
+			favicon.ico
+				"Laurentian University Favicon"
+			static/css/bootstrap/
+				dspace-theme.css
+				bootstrap.css
+				bootstrap-theme.css
+					"Contains styles used by JSP-UI."
+			search/
+				results.jsp
+				advanced.jsp
+				discovery.jsp
+					"The results for a search. We've rearranged the results so tht advanced search is at the bottom."
+			image/
+				lu-logo-only.png
+					"LU logo for use in the JSP-UI's navbars."
+			help/
+				index_en.html
+				index_fr.html
+					"Help file for DSpace."
+				irfaq_en.html
+				irfaq_fr.html
+					"Laurentian FAQ for DSpace."
+				*.jpg
+					"Images for DSpace help."
+			layout/
+				navbar-admin.jsp
+				navbar-minimal.jsp
+				navbar-default.jsp
+					"Navbars for three different contexts of the application. 'Minimal' is when a submission is being made."
+				header-popup.jsp
+				header-submission.jsp
+				header-default.jsp
+					"Headers that advertise DSpace. Clean 'em up."
+				footer-popup.jsp
+				footer-submission.jsp
+				footer-default.jsp
+					"Footer bars containing certain information about DSpace, and some copyrights."
