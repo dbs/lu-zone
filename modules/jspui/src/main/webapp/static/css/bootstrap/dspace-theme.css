@@ -110,7 +110,9 @@ span.batchimport-error-caused {
     border: #222 solid 1px;
     font-size: 0.8em;
 }
-
 .statsTable td, th {
     padding: 4px;
+}
+.navbar-toggle {
+    z-index: 10;
 }
