@@ -116,3 +116,8 @@ span.batchimport-error-caused {
 .navbar-toggle {
     z-index: 10;
 }
+@media (max-width: 767px) {
+    .navbar-nav {
+        margin: 0;
+    }
+}
